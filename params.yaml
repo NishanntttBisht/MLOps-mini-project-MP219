@@ -1,0 +1,18 @@
+data:
+  train_path: data/raw/train.csv
+  later_path: data/raw/later.csv
+  holdout_path: data/raw/holdout_features.csv
+  cleaned_train_path: data/processed/train_cleaned.csv
+
+cleaning:
+  remove_duplicates: true
+  unit_mixup_group: B-Block
+  unit_conversion_factor: 60
+  temperature_sentinel: 999
+  target_typo_threshold: 1000
+  target_correction_factor: 10
+
+  day_type_mapping:
+    wee.: weekday
+    sat.: saturday
+    hol.: holiday
