@@ -3,3 +3,11 @@ numpy==2.5.5
 matplotlib==3.11.2
 PyYAML==6.0.4
 dvc==3.67.1
+scikit-learn
+mlflow
+joblib
+fastapi
+uvicorn
+pydantic
+pytest
+httpx

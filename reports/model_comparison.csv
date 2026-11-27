@@ -1,0 +1,4 @@
+Model,MAE
+Linear Regression,13.714
+Gradient Boosting,16.103
+Random Forest,21.991

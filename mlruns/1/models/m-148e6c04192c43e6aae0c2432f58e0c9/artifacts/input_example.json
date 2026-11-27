@@ -1,0 +1,1 @@
+{"columns": ["students_on_campus", "menu_price_rs", "temp_c", "exam_days_left", "special_dishes", "queue_minutes_yesterday", "day_type", "block"], "data": [[1211, 46, 11.2, 11, 2, 14.9, "holiday", "B-Block"], [1023, 82, 20.6, 18, 1, 18.4, "weekday", "A-Block"], [4947, 73, 13.2, 20, 2, 8.3, "saturday", "A-Block"]]}

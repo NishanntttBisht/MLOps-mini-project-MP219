@@ -36,7 +36,7 @@ def clean_training_data(df):
 
     df.loc[mask, "plates_sold"] = (
         df.loc[mask, "plates_sold"]
-        // settings["target_correction_factor"]
+        / settings["target_correction_factor"]
     )
 
     # Standardize category names
