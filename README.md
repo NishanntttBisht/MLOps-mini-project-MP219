@@ -100,11 +100,11 @@ python -m dvc status
 - [x] Data inspection
 - [x] Data cleaning
 - [x] Data validation
-- [ ] Model training
-- [ ] MLflow tracking
-- [ ] FastAPI deployment
-- [ ] Docker containerization
-- [ ] Kubernetes deployment
-- [ ] CI/CD
-- [ ] Drift monitoring and retraining
-- [ ] Holdout predictions
+- [x] Model training
+- [x] MLflow tracking
+- [x] FastAPI deployment
+- [x] Docker containerization
+- [x] Kubernetes deployment
+- [x] CI/CD
+- [x] Drift monitoring and retraining
+- [x] Holdout predictions
