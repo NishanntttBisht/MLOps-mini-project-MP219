@@ -16,27 +16,20 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error
 
 
-# --------------------------------------------------
 # 1. PROJECT PATHS AND CONFIGURATION
-# --------------------------------------------------
 
 ROOT = Path(__file__).resolve().parents[2]
-
 PARAMS_PATH = ROOT / "params.yaml"
 CLEANED_DATA_PATH = ROOT / "data" / "processed" / "train_cleaned.csv"
 ORIGINAL_DATA_PATH = ROOT / "data" / "raw" / "train.csv"
-
 MODEL_DIR = ROOT / "models"
 MODEL_PATH = MODEL_DIR / "model.joblib"
-
 MLFLOW_DB = ROOT / "mlflow.db"
 EXPERIMENT_NAME = "MP219_Canteen_Prediction"
 MODEL_NAME = "MP219_Canteen_Model"
 
 
-# --------------------------------------------------
 # 2. DATA HASHING
-# --------------------------------------------------
 
 def calculate_data_hash(file_path):
     """Calculate SHA256 hash of the original training dataset."""
@@ -50,9 +43,8 @@ def calculate_data_hash(file_path):
     return sha256.hexdigest()
 
 
-# --------------------------------------------------
 # 3. LOAD CONFIGURATION
-# --------------------------------------------------
+
 
 def load_params():
     """Load project parameters from params.yaml."""
@@ -63,9 +55,7 @@ def load_params():
     return params
 
 
-# --------------------------------------------------
 # 4. LOAD CLEANED DATA
-# --------------------------------------------------
 
 def load_data():
     """Load the cleaned training dataset."""
@@ -77,9 +67,8 @@ def load_data():
     return df
 
 
-# --------------------------------------------------
 # 5. PREPROCESSING
-# --------------------------------------------------
+
 
 def create_preprocessor():
     """Create numerical and categorical preprocessing pipelines."""
@@ -115,9 +104,7 @@ def create_preprocessor():
     return preprocessor
 
 
-# --------------------------------------------------
 # 6. TRAIN FINAL MODEL
-# --------------------------------------------------
 
 def train():
 
@@ -166,9 +153,8 @@ def train():
     # Calculate original dataset hash
     dataset_hash = calculate_data_hash(ORIGINAL_DATA_PATH)
 
-    # --------------------------------------------------
+
     # 7. MLFLOW TRACKING
-    # --------------------------------------------------
 
     mlflow.set_tracking_uri(f"sqlite:///{MLFLOW_DB}")
 
@@ -201,9 +187,8 @@ def train():
         print(f"\nMLflow Run ID: {run_id}")
         print(f"Model URI: {model_info.model_uri}")
 
-    # --------------------------------------------------
+
     # 8. SET CHAMPION ALIAS
-    # --------------------------------------------------
 
     client = mlflow.tracking.MlflowClient()
 
@@ -228,9 +213,7 @@ def train():
         f" | Version: {latest_version.version}"
     )
 
-    # --------------------------------------------------
     # 9. SAVE MODEL LOCALLY
-    # --------------------------------------------------
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -246,9 +229,7 @@ def train():
     }
 
 
-# --------------------------------------------------
 # 10. EXECUTION
-# --------------------------------------------------
 
 if __name__ == "__main__":
 
