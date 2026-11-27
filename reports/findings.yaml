@@ -31,23 +31,22 @@ data_issues:
     true_levels: 3
 monitoring:
   psi:
-    students_on_campus: null
-    menu_price_rs: null
-    temp_c: null
-    exam_days_left: null
-    special_dishes: null
-    queue_minutes_yesterday: null
-  most_drifted_feature: null
+    students_on_campus: 0.028323708735242727
+    menu_price_rs: 3.6902713538318075
+    temp_c: 0.02636594838568635
+    exam_days_left: 0.04922708618443326
+    queue_minutes_yesterday: 0.7767265259197209
+  most_drifted_feature: menu_price_rs
   mae_by_group:
-    A-Block: null
-    B-Block: null
-    Hostel: null
-  worst_served_group: null
-  mae_v1_on_check: null
-  mae_v2_on_check: null
-  decision: null
+    A-Block: 61.59513056637214
+    B-Block: 60.337594831380926
+    Hostel: 33.705342286015444
+  worst_served_group: A-Block
+  mae_v1_on_check: 60.6294
+  mae_v2_on_check: 47.0117
+  decision: promoted
 tracking:
-  experiment_name: null
-  best_run_id: null
-  registered_model_name: null
-  champion_version: null
+  experiment_name: MP219_Canteen_Prediction
+  best_run_id: 8151ad48ffbe48c5933732b806008dc9
+  registered_model_name: MP219_Canteen_Model
+  champion_version: '2'
