@@ -4,12 +4,14 @@
         "menu_price_rs": 3.6902713538318075,
         "temp_c": 0.02636594838568635,
         "exam_days_left": 0.04922708618443326,
-        "queue_minutes_yesterday": 0.7767265259197209
+        "special_dishes": 0.051095945286248605,
+        "queue_minutes_yesterday": 0.03686336658599226,
+        "plates_sold": 1.111040950117154
     },
     "most_drifted_feature": "menu_price_rs",
     "mae_by_group": {
         "A-Block": 61.59513056637214,
-        "B-Block": 60.337594831380926,
+        "B-Block": 37.1938946004685,
         "Hostel": 33.705342286015444
     },
     "worst_served_group": "A-Block"

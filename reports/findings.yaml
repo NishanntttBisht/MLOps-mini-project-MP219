@@ -35,18 +35,20 @@ monitoring:
     menu_price_rs: 3.6902713538318075
     temp_c: 0.02636594838568635
     exam_days_left: 0.04922708618443326
-    queue_minutes_yesterday: 0.7767265259197209
+    special_dishes: 0.051095945286248605
+    queue_minutes_yesterday: 0.03686336658599226
+    plates_sold: 1.111040950117154
   most_drifted_feature: menu_price_rs
   mae_by_group:
     A-Block: 61.59513056637214
-    B-Block: 60.337594831380926
+    B-Block: 37.1938946004685
     Hostel: 33.705342286015444
   worst_served_group: A-Block
-  mae_v1_on_check: 60.6294
-  mae_v2_on_check: 47.0117
-  decision: promoted
+  mae_v1_on_check: 46.7764
+  mae_v2_on_check: 38.6985
+  decision: promoted_v2
 tracking:
   experiment_name: MP219_Canteen_Prediction
-  best_run_id: 8151ad48ffbe48c5933732b806008dc9
+  best_run_id: a85b42193c8b4660b35ee3f1c977c7fa
   registered_model_name: MP219_Canteen_Model
-  champion_version: '2'
+  champion_version: 3

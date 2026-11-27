@@ -2,32 +2,37 @@ from pathlib import Path
 import json
 import numpy as np
 import pandas as pd
-import joblib
+import mlflow
+import mlflow.sklearn
 
 from sklearn.metrics import mean_absolute_error
 from canteen.data_cleaning import clean_training_data
 
 ROOT = Path(__file__).resolve().parents[2]
 
-NUMERIC_FEATURES = [
+TRAIN_PATH = ROOT / "data" / "raw" / "train.csv"
+LATER_PATH = ROOT / "data" / "raw" / "later.csv"
+OUTPUT_PATH = ROOT / "reports" / "monitoring_results.json"
+MLFLOW_DB = ROOT / "mlflow.db"
+
+MODEL_NAME = "MP219_Canteen_Model"
+
+NUMERIC_COLUMNS = [
     "students_on_campus",
     "menu_price_rs",
     "temp_c",
     "exam_days_left",
+    "special_dishes",
     "queue_minutes_yesterday",
+    "plates_sold",
 ]
-
-MODEL_PATH = ROOT / "models" / "model.joblib"
-TRAIN_PATH = ROOT / "data" / "raw" / "train.csv"
-LATER_PATH = ROOT / "data" / "raw" / "later.csv"
-OUTPUT_PATH = ROOT / "reports" / "monitoring_results.json"
 
 
 def calculate_psi(reference, current, bins=10):
     reference = pd.Series(reference).dropna()
     current = pd.Series(current).dropna()
 
-    if len(reference) == 0 or len(current) == 0:
+    if reference.empty or current.empty:
         return None
 
     edges = np.unique(
@@ -49,63 +54,79 @@ def calculate_psi(reference, current, bins=10):
     ref_pct = np.clip(ref_pct, 0.0001, None)
     cur_pct = np.clip(cur_pct, 0.0001, None)
 
-    return float(np.sum((cur_pct - ref_pct) * np.log(cur_pct / ref_pct)))
+    return float(
+        np.sum((cur_pct - ref_pct) * np.log(cur_pct / ref_pct))
+    )
 
 
 def main():
-    print("Loading datasets...")
+    print("Loading data...")
 
     train_raw = pd.read_csv(TRAIN_PATH)
-    later_raw = pd.read_csv(LATER_PATH)
+    later = pd.read_csv(LATER_PATH)  # later data is already clean
 
     train = clean_training_data(train_raw)
-    later = clean_training_data(later_raw)
 
-    model = joblib.load(MODEL_PATH)
+    # Use the registered V1 model explicitly, not the local V2 champion
+    mlflow.set_tracking_uri(f"sqlite:///{MLFLOW_DB}")
 
-    print("Calculating PSI...")
+    v1_uri = f"models:/{MODEL_NAME}/1"
+    print(f"Loading original V1 from: {v1_uri}")
+
+    v1 = mlflow.sklearn.load_model(v1_uri)
+
+    # PSI for all numeric columns
+    print("\nCalculating PSI...")
 
     psi_results = {}
 
-    for feature in NUMERIC_FEATURES:
-        psi_results[feature] = calculate_psi(
-            train[feature], later[feature]
+    for column in NUMERIC_COLUMNS:
+        psi_results[column] = calculate_psi(
+            train[column],
+            later[column],
+            bins=10
         )
 
     most_drifted = max(
         psi_results,
-        key=lambda x: psi_results[x] if psi_results[x] is not None else -1
+        key=lambda column: (
+            psi_results[column]
+            if psi_results[column] is not None
+            else -1
+        )
     )
 
     print("\nPSI RESULTS")
-    for feature, value in psi_results.items():
-        print(f"{feature}: {value:.4f}" if value is not None else f"{feature}: N/A")
+    for column, value in psi_results.items():
+        print(f"{column}: {value:.4f}" if value is not None else f"{column}: N/A")
 
-    print(f"\nMost drifted feature: {most_drifted}")
+    print(f"\nMost drifted column: {most_drifted}")
 
-    print("\nCalculating MAE by block...")
+    # V1 MAE on clean later data by block
+    print("\nCalculating V1 MAE by block...")
 
-    features = later.drop(
-        columns=["record_id", "date", "plates_sold"]
+    X_later = later.drop(columns=["record_id", "date", "plates_sold"])
+    y_later = later["plates_sold"]
+
+    predictions = v1.predict(X_later)
+
+    later_eval = later.copy()
+    later_eval["prediction"] = predictions
+    later_eval["absolute_error"] = abs(
+        later_eval["plates_sold"] - later_eval["prediction"]
     )
-    actual = later["plates_sold"]
-
-    predictions = model.predict(features)
-
-    later["prediction"] = predictions
-    later["absolute_error"] = abs(actual - predictions)
 
     mae_by_group = (
-        later.groupby("block")["absolute_error"]
+        later_eval.groupby("block")["absolute_error"]
         .mean()
         .to_dict()
     )
 
     worst_group = max(mae_by_group, key=mae_by_group.get)
 
-    print("\nMAE BY BLOCK")
+    print("\nV1 MAE BY BLOCK")
     for block, mae in mae_by_group.items():
-        print(f"{block}: {mae:.3f}")
+        print(f"{block}: {mae:.4f}")
 
     print(f"\nWorst-served group: {worst_group}")
 
