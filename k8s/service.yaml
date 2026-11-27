@@ -3,10 +3,14 @@ kind: Service
 metadata:
   name: mp219-svc
 spec:
+  # Routes traffic to pods with this label (the Deployment's pods)
   selector:
     app: mp219-api
   ports:
     - protocol: TCP
+      # Port the service exposes inside the cluster
       port: 80
+      # Port the container actually listens on
       targetPort: 8000
+  # Internal-only; not reachable from outside the cluster
   type: ClusterIP

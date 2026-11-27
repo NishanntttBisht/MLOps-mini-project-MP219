@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: mp219-api
 spec:
+  # Run 4 identical pods for availability and load sharing
   replicas: 4
   selector:
     matchLabels:
@@ -15,19 +16,21 @@ spec:
       containers:
         - name: mp219-api
           image: mp219-api:1.0
+          # Use the local image if it already exists on the node
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
+          # Pod only receives traffic once this check passes
           readinessProbe:
             httpGet:
               path: /health
               port: 8000
             initialDelaySeconds: 5
             periodSeconds: 5
+          # Container is restarted if this check keeps failing
           livenessProbe:
             httpGet:
               path: /health
               port: 8000
             initialDelaySeconds: 20
             periodSeconds: 10
-

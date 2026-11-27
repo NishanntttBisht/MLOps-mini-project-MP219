@@ -25,7 +25,9 @@ MLFLOW_DB = ROOT / "mlflow.db"
 MODEL_NAME = "MP219_Canteen_Model"
 EXPERIMENT_NAME = "MP219_Canteen_Prediction"
 
+# V2 must beat V1's MAE by at least 8% to be promoted
 PROMOTION_THRESHOLD = 0.08
+# Share of later.csv used for retraining; the rest is held out for validation
 NEW_DATA_RATIO = 0.70
 
 
@@ -81,6 +83,7 @@ def main():
     # Later data is already clean — do NOT apply training fixes
     later = pd.read_csv(LATER_PATH)
 
+    # Chronological split: earlier rows for training, latest rows for validation
     later = later.sort_values("date").reset_index(drop=True)
 
     split_index = int(len(later) * NEW_DATA_RATIO)
@@ -131,6 +134,7 @@ def main():
     v2_predictions = v2.predict(X_val)
     v2_mae = mean_absolute_error(y_val, v2_predictions)
 
+    # Relative MAE reduction vs V1; promote only if it clears the threshold
     improvement = (v1_mae - v2_mae) / v1_mae
 
     promoted = improvement >= PROMOTION_THRESHOLD
@@ -146,6 +150,7 @@ def main():
 
     with mlflow.start_run(run_name="retraining_v2") as run:
 
+        # Log run configuration, metrics, and the promotion decision
         mlflow.log_param("original_train_rows", len(train))
         mlflow.log_param("new_data_rows", len(new_training_data))
         mlflow.log_param("validation_rows", len(validation_data))
@@ -174,7 +179,7 @@ def main():
 
             client = mlflow.tracking.MlflowClient()
 
-            # Fetch the newly created version
+            # Fetch the newly created version (highest version number)
             versions = client.search_model_versions(
                 f"name='{MODEL_NAME}'"
             )
@@ -184,6 +189,7 @@ def main():
                 for version in versions
             )
 
+            # Point the "champion" alias at the new version
             client.set_registered_model_alias(
                 MODEL_NAME,
                 "champion",
@@ -202,6 +208,7 @@ def main():
 
             client = mlflow.tracking.MlflowClient()
 
+            # V1 stays champion
             client.set_registered_model_alias(
                 MODEL_NAME,
                 "champion",
@@ -218,7 +225,7 @@ def main():
     print(f"\nChampion model version: {champion_version}")
     print(f"Saved champion to: {MODEL_PATH}")
 
-    # Update findings.yaml
+    # Update findings.yaml with monitoring and tracking results
     findings_path = ROOT / "reports" / "findings.yaml"
 
     with open(findings_path, "r") as file:

@@ -1,4 +1,6 @@
 {
+
+
     "psi": {
         "students_on_campus": 0.028323708735242727,
         "menu_price_rs": 3.6902713538318075,
@@ -8,11 +10,18 @@
         "queue_minutes_yesterday": 0.03686336658599226,
         "plates_sold": 1.111040950117154
     },
+
+
     "most_drifted_feature": "menu_price_rs",
+
     "mae_by_group": {
         "A-Block": 61.59513056637214,
         "B-Block": 37.1938946004685,
         "Hostel": 33.705342286015444
     },
+    
     "worst_served_group": "A-Block"
+
+
+
 }

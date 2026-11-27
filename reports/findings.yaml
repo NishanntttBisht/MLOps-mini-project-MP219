@@ -1,14 +1,18 @@
 group_id: G194
 problem_id: MP219
+
+# Data quality issues found in train.csv (present: false means not found)
 data_issues:
   leaking_column:
     present: false
     column: null
+  # B-Block reported queue time in seconds instead of minutes
   unit_mixup:
     present: true
     column: queue_minutes_yesterday
     group_value: B-Block
     factor: 60
+  # 999 used as a placeholder for missing temperature
   sentinel_value:
     present: true
     column: temp_c
@@ -22,14 +26,19 @@ data_issues:
     column: null
     start_date: null
     end_date: null
+  # Typos in plates_sold
   target_typos:
     present: true
     count: 15
+  # Inconsistent spellings of day_type that collapse to 3 real levels
   spelling_variants:
     present: true
     column: day_type
     true_levels: 3
+
+# Drift check of later.csv against training data, plus V1 performance
 monitoring:
+  # PSI per feature: <0.1 stable, 0.1-0.25 moderate, >0.25 major drift
   psi:
     students_on_campus: 0.028323708735242727
     menu_price_rs: 3.6902713538318075
@@ -39,16 +48,21 @@ monitoring:
     queue_minutes_yesterday: 0.03686336658599226
     plates_sold: 1.111040950117154
   most_drifted_feature: menu_price_rs
+  # V1 MAE on later data, per block
   mae_by_group:
     A-Block: 61.59513056637214
     B-Block: 37.1938946004685
     Hostel: 33.705342286015444
   worst_served_group: A-Block
+  # Validation MAE of V1 vs retrained V2 (about 17% better, above the 8% threshold)
   mae_v1_on_check: 46.7764
   mae_v2_on_check: 38.6985
   decision: promoted_v2
+
+# MLflow tracking details (written by the retraining script)
 tracking:
   experiment_name: MP219_Canteen_Prediction
   best_run_id: a85b42193c8b4660b35ee3f1c977c7fa
   registered_model_name: MP219_Canteen_Model
+  # Version 3 (not 2) suggests the retraining script has been run more than once
   champion_version: 3

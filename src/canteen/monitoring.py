@@ -29,19 +29,23 @@ NUMERIC_COLUMNS = [
 
 
 def calculate_psi(reference, current, bins=10):
+    """Population Stability Index: how far `current` has drifted from `reference`."""
     reference = pd.Series(reference).dropna()
     current = pd.Series(current).dropna()
 
     if reference.empty or current.empty:
         return None
 
+    # Bin edges are quantiles of the reference data
     edges = np.unique(
         np.quantile(reference, np.linspace(0, 1, bins + 1))
     )
 
+    # Too few distinct values to form meaningful bins
     if len(edges) < 3:
         return 0.0
 
+    # Open-ended outer bins so out-of-range values are still counted
     edges[0] = -np.inf
     edges[-1] = np.inf
 
@@ -51,6 +55,7 @@ def calculate_psi(reference, current, bins=10):
     ref_pct = ref_counts / len(reference)
     cur_pct = cur_counts / len(current)
 
+    # Clip to avoid log(0) and division by zero in empty bins
     ref_pct = np.clip(ref_pct, 0.0001, None)
     cur_pct = np.clip(cur_pct, 0.0001, None)
 
@@ -75,7 +80,7 @@ def main():
 
     v1 = mlflow.sklearn.load_model(v1_uri)
 
-    # PSI for all numeric columns
+    # PSI for all numeric columns (training vs later data)
     print("\nCalculating PSI...")
 
     psi_results = {}
@@ -87,6 +92,7 @@ def main():
             bins=10
         )
 
+    # Column with the highest PSI; None values are treated as lowest
     most_drifted = max(
         psi_results,
         key=lambda column: (
@@ -105,6 +111,7 @@ def main():
     # V1 MAE on clean later data by block
     print("\nCalculating V1 MAE by block...")
 
+    # Drop identifiers and the target before predicting
     X_later = later.drop(columns=["record_id", "date", "plates_sold"])
     y_later = later["plates_sold"]
 
@@ -122,6 +129,7 @@ def main():
         .to_dict()
     )
 
+    # Block with the highest error is the worst served
     worst_group = max(mae_by_group, key=mae_by_group.get)
 
     print("\nV1 MAE BY BLOCK")
@@ -137,6 +145,7 @@ def main():
         "worst_served_group": worst_group,
     }
 
+    # Save results as JSON, creating the reports folder if needed
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     with open(OUTPUT_PATH, "w") as f:
